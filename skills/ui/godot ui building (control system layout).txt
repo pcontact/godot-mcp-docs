@@ -1,0 +1,126 @@
+# godot ui building (control system layout)
+
+## Summary
+
+Create responsive, resolution-independent UI in Godot using Control nodes, anchors, containers, and theme overrides. Focus on building layouts that scale across screens without manual positioning.
+
+## Tags
+
+godot-ui, control-nodes, containers, layout, responsive-ui, theme, anchors, ui-design, godot4
+
+## When to use
+
+* Building menus, HUDs, dialogs, overlays
+* Creating responsive interfaces that adapt to screen size
+* Laying out buttons, panels, lists, and forms
+* Fixing UI that breaks on different resolutions or aspect ratios
+
+## Prerequisites
+
+* Basic understanding of Godot scene system
+* Familiarity with nodes and scenes
+* Knowledge of signals (for button interactions)
+* Optional: basic GDScript for UI logic
+
+## Procedure
+
+### 1. Choose the correct root node
+
+* Use `Control` for all UI scenes
+* Use specialized roots when appropriate:
+
+  * `Panel` / `PanelContainer` for boxed UI
+  * `MarginContainer` for padding-based layouts
+  * `CanvasLayer` only for overlay HUDs
+
+### 2. Use containers first, manual positioning last
+
+* Prefer containers over manual `rect_position`
+* Key containers:
+
+  * `VBoxContainer` → vertical stacking
+  * `HBoxContainer` → horizontal stacking
+  * `GridContainer` → grid layouts
+  * `MarginContainer` → spacing control
+  * `CenterContainer` → centering UI elements
+
+Rule: if you are setting positions manually, you are likely doing it wrong.
+
+### 3. Configure anchors properly (when not using containers)
+
+* Use anchors for responsive scaling:
+
+  * Full screen UI: anchors (0,0) to (1,1)
+  * Top bar: top-left to top-right stretch
+  * Bottom HUD: bottom-left to bottom-right
+* Avoid fixed pixel positioning unless UI is static
+
+### 4. Structure UI hierarchies cleanly
+
+* Keep depth shallow (3–5 levels max)
+* Group related UI in containers or sub-scenes
+* Split complex UI into reusable scenes (e.g., `inventory_slot.tscn`)
+
+### 5. Use themes for consistency
+
+* Define fonts, colors, padding via `Theme`
+* Avoid per-node styling unless overriding intentionally
+* Centralize UI style in a shared theme resource
+
+### 6. Connect UI logic via signals
+
+* Use built-in signals:
+
+  * `pressed()` for buttons
+  * `text_changed()` for inputs
+* Avoid polling UI state in `_process` unless necessary
+
+### 7. Make UI scalable
+
+* Use `Size Flags`:
+
+  * Expand / Fill appropriately
+* Avoid fixed sizes unless required
+* Test at multiple resolutions early
+
+## Common mistakes
+
+* Using `Node2D` instead of `Control` for UI
+* Hardcoding pixel positions for responsive UI
+* Ignoring containers and overusing manual layout
+* Deeply nested UI hierarchies (hard to maintain)
+* Styling individual nodes instead of using themes
+* Forgetting size flags, causing UI collapse or overflow
+
+## Example
+
+### Basic menu layout
+
+```
+Control
+ └── CenterContainer
+      └── VBoxContainer
+           ├── Label (Title)
+           ├── Button (Start)
+           ├── Button (Settings)
+           └── Button (Quit)
+```
+
+### Minimal script (button handling)
+
+```gdscript
+extends Control
+
+func _ready():
+    $CenterContainer/VBoxContainer/StartButton.pressed.connect(_on_start)
+
+func _on_start():
+    print("Game started")
+```
+
+## Notes
+
+* Prefer composition over inheritance for UI scenes
+* Break reusable UI parts into sub-scenes early (buttons, slots, panels)
+* UI bugs in Godot are almost always layout/anchor/container misuse, not code logic
+* Related skills: `godot-theme-creation`, `godot-ui-signals-pattern`, `godot-responsive-layout-debugging`

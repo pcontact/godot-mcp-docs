@@ -5,15 +5,19 @@ Serves Godot documentation through MCP with stdio transport
 """
 
 import sys
-import logging
-from srcs.utils.docs_utils import ensure_docs_dir
-from srcs.server import mcp
 from pathlib import Path
+import logging
 
 sys.path.append(str(Path(__file__).parent / "srcs"))
 
+
+from srcs.utils.docs_utils import ensure_docs_dir
+from srcs.server import mcp
+
+
 # Import modules to register decorators
 import srcs.tools.navigation_tools
+import srcs.tools.skill_tools
 import srcs.resources.doc_resources
 
 def setup_logging():
@@ -26,7 +30,6 @@ def setup_logging():
 
 def main():
     """Main entry point for the Godot MCP server"""
-    print("Starting Godot MCP Server...")  # Print to stdout for MCP protocol
     setup_logging()
     logger = logging.getLogger("godot-mcp-server")
     

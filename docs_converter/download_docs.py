@@ -60,12 +60,8 @@ def download_repo():
         print("ZIP file downloaded")
         
         # Extract ZIP file
-        with zipfile.ZipFile(zip_file, 'r') as zip_ref:
-            zip_ref.extractall("temp")
-        
         # Move extracted folder to docs directory
-        extracted_dir = "temp/godot-docs-master"
-        shutil.move(extracted_dir, docs_dir)
+        extract_zip(zip_file, docs_dir)
         
         # Cleanup
         os.remove(zip_file)
@@ -81,3 +77,12 @@ def download_repo():
         if os.path.exists("temp"):
             shutil.rmtree("temp")
         raise Exception(f"Download failed: {e}")
+    
+def extract_zip(zip_file, out_dir):
+    # Extract ZIP file
+    with zipfile.ZipFile(zip_file, 'r') as zip_ref:
+        zip_ref.extractall("temp")
+    
+    # Move extracted folder to docs directory
+    extracted_dir = "temp/godot-docs-master"
+    shutil.move(extracted_dir, out_dir)

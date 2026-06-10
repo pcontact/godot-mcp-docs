@@ -1,0 +1,110 @@
+```markdown
+# godot-ui-signals-pattern
+
+## Summary
+A flexible pattern for handling UI signals in Godot, supporting both direct node-to-script connections and a decoupled signal bus (autoload) architecture. The skill acts as a template; the agent must read the target Godot version's API documentation for exact syntax.
+
+## Tags
+godot, ui, signals, event-handling, decoupling, signal-bus, pattern, template
+
+## When to use
+- You need to connect UI elements (Button, LineEdit, CheckBox, etc.) to game logic.
+- You want to decouple UI from game systems to avoid hard references.
+- The project may be in Godot 3.x, 4.x, or future versions.
+- The agent must adapt the implementation based on the actual engine version used.
+
+## Prerequisites
+- Understands Godot's node tree and basic script attachment.
+- Can read Godot's official documentation for `Signal`, `connect`, `emit`, and autoloads.
+- Knows how to create a scene with a UI node (e.g., Button).
+
+## Procedure
+
+### 1. Determine the requirement
+Ask or infer: does the project need a **direct connection** (simple, coupled) or a **signal bus** (decoupled, global)?
+
+- **Direct connection** – UI node signals are connected directly to a script that handles the logic (e.g., the same scene's root script). Good for self‑contained UI.
+- **Signal bus** – An autoload (e.g., `UIBus`) that centralizes signals. UI nodes emit to the bus, and other systems connect to the bus. Good for complex games with many scenes.
+
+### 2. Read the target Godot version's API
+Instruct the agent:
+> Before writing any connection or emission code, determine the Godot version (e.g., by inspecting `Engine.get_version_info()` or `@tool` scripts if available). Then look up the official documentation for:
+> - `Object.connect` or `Signal.connect` method
+> - `emit_signal` vs `signal.emit`
+> - Autoload creation (Project Settings → Autoload)
+
+### 3. Implement the chosen pattern
+
+#### Direct connection pattern
+- In the UI node's script (or in the scene root's `_ready()`), connect the UI signal to a local method.
+- **Version‑agnostic steps**:
+  1. Get a reference to the UI node (e.g., `$Button`).
+  2. Use the version‑appropriate connect syntax to link the signal to a method (e.g., `_on_button_pressed`).
+  3. Define the callback method with the expected parameters.
+
+#### Signal bus pattern
+- Create a new script (e.g., `ui_bus.gd`) that extends `Node` and defines signals.
+- Add the script as an autoload (name it `UIBus`).
+- From UI nodes, emit signals on `UIBus` instead of directly.
+- From game systems, connect to `UIBus` signals.
+- **Version‑agnostic steps**:
+  1. Define signals in the autoload script (e.g., `signal start_game_pressed`).
+  2. In the UI script, call `UIBus.start_game_pressed.emit()` (or version equivalent) on the action.
+  3. In the game controller script, connect to `UIBus.start_game_pressed` in `_ready()`.
+
+### 4. Handle edge cases
+- If the UI node is dynamically added, connect signals after adding it to the tree.
+- For `LineEdit`, consider connecting `text_changed` or `text_submitted` as needed.
+- For signal bus, ensure the autoload is loaded before any UI script tries to use it (it always is, because autoloads are ready first).
+
+## Common mistakes
+- Using string‑based `connect` in Godot 4 (deprecated; use callable syntax).
+- Forgetting to disconnect signals when a node is removed (Godot automatically cleans up, but custom connections to persistent nodes may linger if not manually disconnected).
+- Emitting signals on a bus that hasn't been defined as an autoload.
+- Assuming signal parameters match – always check the signal's signature in the documentation or via editor tooltips.
+
+## Example
+
+**Context**: Godot 4 – a simple UI with a "Start" button that triggers a game start.  
+**Requirement**: Decoupled signal bus pattern (though the note below shows how to adapt for direct connection).
+
+**Step 1 – Signal bus autoload (`ui_bus.gd`)**:
+```gdscript
+extends Node
+
+signal start_game
+```
+
+**Step 2 – UI button script (attached to a Button node)**:
+```gdscript
+extends Button
+
+func _ready():
+    pressed.connect(_on_pressed)  # Direct connection to local method (optional, but shown for completeness)
+    # Alternative: the bus pattern below
+
+func _on_pressed():
+    UIBus.start_game.emit()   # Godot 4 syntax
+```
+
+**Step 3 – Game controller (e.g., main.gd)**:
+```gdscript
+extends Node
+
+func _ready():
+    UIBus.start_game.connect(_on_start_game)
+
+func _on_start_game():
+    print("Game started!")
+```
+
+> **Note for version adaptation**:  
+> - In **Godot 3.x**, replace `.emit()` with `emit_signal("start_game")` and `.connect(callable)` with `.connect("start_game", self, "_on_start_game")`.  
+> - Always check the official docs for the exact API of the version your project uses.
+
+## Notes
+- This skill is a **template**. The agent must read the target Godot version's documentation for exact signal syntax.
+- For complex UI with many signals, prefer the signal bus pattern to avoid spaghetti code.
+- Do not hardcode version‑specific syntax; instead, instruct the agent to detect or ask for the version.
+- Related patterns: `godot-custom-signals`, `godot-autoload-pattern` (if created later).
+```

@@ -1,0 +1,52 @@
+# Skill Creation Guideline
+
+## Purpose
+This file defines the writing standard for skills stored in `/skills`. The system is retrieval‑first, so skills should be written for fast discovery, reuse, and refinement by agents.
+
+## Canonical Skill Schema
+- `# Title`
+- `## Summary`
+- `## Tags`
+- `## When to use`
+- `## Prerequisites`
+- `## Procedure`
+- `## Common mistakes`
+- `## Example`
+- `## Notes`
+
+## Writing Rules
+
+- Keep the summary short and searchable.
+- Use tags that map to likely search terms and workflows.
+- Explain procedural steps in a way an agent can execute directly.
+- Include edge cases, caveats, and gotchas when they matter.
+- Prefer specific examples over broad theory.
+- **If the skill targets a framework or engine with multiple versions (e.g., Godot 3 vs 4, React 17 vs 18), design it as a version‑agnostic template.**  
+  - Do not hardcode version‑specific API calls.  
+  - Instruct the agent to **detect or ask for the target version** and read that version’s official documentation for exact syntax.  
+  - Provide a version‑aware note or a small decision tree (e.g., “For Godot 3 use X, for Godot 4 use Y”) only when the difference is small and well‑defined.
+- **When the skill’s implementation depends on external docs**, explicitly tell the agent to fetch or consult those docs. Example: “Look up the `connect` method in the current Godot version’s Signal API.”
+
+## Search and Reuse
+
+- Skills should be written so they can be found by search, not just by browsing.
+- Reuse should be explicit: mention related skills or follow‑up actions where useful.
+- When the same pattern repeats, create a dedicated skill instead of hiding it in a large one.
+
+## Creation Guidance
+
+- Use lowercase hyphenated filenames derived from the title.
+- Do not overwrite an existing skill.
+- Keep new skills flexible but still structured. Flexibility includes:  
+  - Offering multiple common patterns (e.g., direct connection vs signal bus).  
+  - Leaving placeholders (`{{like_this}}`) only when the agent must substitute a project‑specific name; otherwise prefer procedural instructions.
+- If the content is short, still keep the schema headings in place.
+- **For skills that act as templates** (e.g., `godot-ui-signals-pattern`):  
+  - State clearly in the `Summary` or `When to use` that the skill provides a pattern, not copy‑paste code.  
+  - The `Example` should show one concrete version (e.g., Godot 4) with a note explaining how to adapt to others.  
+  - Avoid over‑generalising – provide enough structure so the agent can fill in version‑specific details from official docs.
+
+## Legacy Compatibility
+
+- Older skill files may not follow this schema exactly.
+- The index should still parse them permissively when possible.

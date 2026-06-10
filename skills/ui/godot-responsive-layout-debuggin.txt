@@ -1,0 +1,86 @@
+# godot-responsive-layout-debugging
+
+## Summary
+A systematic debugging pattern for Godot UI layouts that behave unexpectedly – containers not resizing, controls not anchoring, or size flags ignored. Version‑agnostic; instructs the agent to consult the target Godot version's documentation for exact debug tools and API.
+
+## Tags
+godot, layout, responsive, ui, containers, debugging, anchors, margins, size-flags
+
+## When to use
+- UI elements don't scale or stretch as expected when the window resizes.
+- Container children overlap, clip incorrectly, or ignore arrangement rules.
+- Anchor presets seem applied but have no effect.
+- `min_size`, `size_flags`, or `expand` flags produce confusing results.
+
+## Prerequisites
+- Understands Godot's node tree and basic Control node properties (`rect_min_size`, `size_flags_horizontal/vertical`, anchor presets).
+- Can attach scripts and inspect runtime properties.
+- Able to read the target Godot version's manual sections on:
+  - Containers (HBox, VBox, Grid, etc.)
+  - Layout debugging tools (e.g., "Visible Layout Bounds")
+  - `Control` class documentation
+
+## Procedure
+
+### 1. Identify the misbehaving node(s)
+- Determine which Control node does not respond to window resizing or container logic.
+- Check if the node is a direct child of a **Container** or placed freely with anchor presets.
+- Is it inside a nested container chain? Note the full path.
+
+### 2. Enable visual layout debugging
+Instruct the agent:
+> Look up how to **show layout bounds** in the target Godot version:
+> - **Godot 4**: Editor → Debug → Visible Layout Bounds. At runtime, enable via `Project Settings → Debug → Settings/Editor?` Actually check docs: `Debug` menu in running game? Safer: Print `rect` values or add a temporary `ColorRect`.
+> - **Generic method**: Add a temporary script to the problematic node that draws a colored border (e.g., `draw_rect` in `_draw()`). Or print `get_rect()` and `get_global_rect()` in `_process()`.
+
+If the exact menu item or project setting is unknown, the agent should search the official documentation for "visible layout bounds" or "debug layout".
+
+### 3. Check container properties (if parent is a Container)
+- Verify the container's **alignment** and **stretch** settings (e.g., `alignment` for HBox, `stretch_ratio` for children).
+- For `GridContainer`, confirm columns/rows are correct.
+- Ensure `rect_min_size` of container is not forcing zero size.
+
+### 4. Inspect child Control properties
+- `size_flags_horizontal` and `size_flags_vertical` – common values: `SIZE_FILL` (expand to available space), `SIZE_SHRINK_CENTER` (center instead of stretch).
+- `rect_min_size` – if too large, it may push siblings out.
+- `anchor_preset` – only relevant for non‑container parents. If a node is inside a container, anchors are ignored – this is a frequent mistake.
+
+### 5. Force update and re‑sort
+- Call `queue_sort()` on the container after programmatically changing child properties.
+- Use `update_minimum_size()` on a Control if you change `rect_min_size` after the scene is ready.
+
+### 6. Isolate with a test scene
+- Duplicate the problematic UI branch into a minimal test scene.
+- Remove signals and game logic to see if the layout issue persists.
+- Swap container types (e.g., HBox → VBox) to identify misconfiguration.
+
+### 7. Consult version‑specific API
+> For any method or constant (e.g., `SIZE_FILL`, `queue_sort`, `update_minimum_size`), look up the exact name in the target Godot version's `Control` and `Container` documentation. Constants may be under `Control.SizeFlags` in Godot 4.
+
+## Common mistakes
+- Expecting anchors to work on a node that is a child of a Container – they don't; the container overrides them.
+- Setting `size_flags` but forgetting that the container also needs a non‑zero available size (e.g., parent node has no `rect_size`).
+- Not calling `queue_sort()` after manually changing container children at runtime.
+- Using `rect_position` directly when inside a container – should modify layout flags instead.
+- In Godot 3, using `rect_min_size` vs `rect_size`; in Godot 4, `custom_minimum_size` replaces `rect_min_size`. The agent must verify the property name.
+
+## Example
+
+**Context**: Godot 4 – a `VBoxContainer` with two buttons. The buttons do not expand horizontally when the window is widened.  
+**Goal**: Make buttons fill the full width.
+
+### Debugging steps
+1. Enable layout bounds (Godot 4: Editor → Debug → Visible Layout Bounds – shows container outlines).
+2. Observe that the VBoxContainer expands, but buttons stay left‑aligned.
+3. Check button properties: `size_flags_horizontal` is 0 (default = `SIZE_SHRINK_BEGIN`).
+4. Set `size_flags_horizontal` to 3 (`Control.SIZE_FILL` + `Control.SIZE_EXPAND`) in the inspector or script.
+5. Buttons now stretch horizontally.
+6. Alternative: Set VBoxContainer's `alignment` to center? No, that would center buttons, not stretch.
+
+**Version adaptation note**:  
+- In **Godot 3**, `size_flags_horizontal` uses `Control.SIZE_EXPAND` (value 1) and `Control.SIZE_FILL` (value 4). Use bitmask: `SIZE_EXPAND | SIZE_FILL` = 5. Check the docs for exact constants.
+
+## Notes
+- This skill provides a **pattern**, not a copy‑paste script. The agent must look up version‑specific property names and debug tool locations.
+- For complex responsive layouts, consider using `Control`'s `resized` signal or `_notification(NOTIFICATION_RESIZED)` to log changes.
+- Related skills: `godot-ui-signals-pattern` (for UI event decoupling), `godot-container-essentials` (if created later).

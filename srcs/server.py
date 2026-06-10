@@ -10,6 +10,6 @@ from fastmcp import FastMCP
 mcp = FastMCP(
     name="godot-docs-server",
     instructions="""
-        This server provides tools for interacting with Godot documentation.
+        This server provides tools for interacting with Godot documentation and skills.
     """
 )
