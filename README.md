@@ -41,6 +41,41 @@ This server bridges the gap between AI assistants and Godot documentation, allow
    }
    ```
 
+## Local Development
+
+Follow these steps to run the project locally without Docker (recommended for development):
+
+
+1. Recommended: Using Docker `uv` workflow, install Astral `uv` and run:
+
+```bash
+curl -LsSf https://astral.sh/uv/install.sh | sh
+uv sync
+uv run fastmcp run main.py
+```
+
+2. Create and activate a virtual environment, then install Python dependencies:
+
+```bash
+python -m venv .venv
+source .venv/bin/activate
+pip install --upgrade pip
+pip install -r requirements.txt
+```
+
+3. Install system binaries (Debian/Ubuntu example):
+
+```bash
+./scripts/install_system_deps.sh
+```
+
+4. Run the docs conversion and start the server (script automates both steps):
+
+```bash
+./scripts/run_local.sh
+```
+
+
 ## Documentation Structure
 
 The server provides access to the complete official Godot documentation with this structure:

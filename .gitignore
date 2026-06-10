@@ -3,3 +3,4 @@ uv.lock
 .env
 *venv*
 docs/
+godot-docs.zip

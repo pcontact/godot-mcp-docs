@@ -26,6 +26,7 @@ def setup_logging():
 
 def main():
     """Main entry point for the Godot MCP server"""
+    print("Starting Godot MCP Server...")  # Print to stdout for MCP protocol
     setup_logging()
     logger = logging.getLogger("godot-mcp-server")
     
